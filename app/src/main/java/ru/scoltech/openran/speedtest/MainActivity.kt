@@ -34,16 +34,8 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        ArrayAdapter.createFromResource(
-            this,
-            R.array.commands,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.spinner.adapter = adapter
-        }
         binding.refreshButton.setOnClickListener { refreshAddresses() }
+
         refreshAddresses()
 
         iperfRunner = IperfRunner(applicationContext.filesDir.absolutePath).also {
@@ -57,19 +49,11 @@ class MainActivity : AppCompatActivity() {
         )
 
         startStopButtonDispatcher.firstAction = {
-            Log.d("spiner", binding.spinner.selectedItemPosition.toString())
-            when (binding.spinner.selectedItemPosition) {
-                0 -> startIperf()
-                1 -> runIcmpPingAsCommand()
-            }
-            binding.spinner.isEnabled = false
+            startIperf()
         }
+
         startStopButtonDispatcher.secondAction = {
-            when (binding.spinner.selectedItemPosition) {
-                0 -> stopIperf()
-                1 -> stopICMPPing()
-            }
-            binding.spinner.isEnabled = true
+            stopIperf()
         }
 
 
@@ -117,6 +101,20 @@ class MainActivity : AppCompatActivity() {
         }
         binding.pingLayout.isVisible = false
 
+
+        binding.expandButton2.setOnClickListener {
+            if (binding.deviceInfoLayout.isVisible) {
+                binding.deviceInfoLayout.isVisible = false
+                binding.expandButton2.setImageResource(android.R.drawable.arrow_down_float)
+
+            } else {
+                binding.deviceInfoLayout.isVisible = true
+                binding.expandButton2.setImageResource(android.R.drawable.arrow_up_float)
+
+            }
+        }
+        binding.deviceInfoLayout.isVisible = false
+
     }
 
     private fun startPingCheckServer() {
@@ -158,6 +156,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun refreshAddresses() {
+        print("checking ip")
         binding.ipInfo.text = NetworkInterface.getNetworkInterfaces()
             .toList()
             .filter { it.inetAddresses.hasMoreElements() }
@@ -179,14 +178,12 @@ class MainActivity : AppCompatActivity() {
         iperfRunner.start(binding.iperfArgs.text.toString())
 
         binding.iperfArgs.isEnabled = false
-        binding.startStopButton.text = applicationContext.getString(R.string.stopIperf)
     }
 
     private fun stopIperf() {
         iperfRunner.stop()
 
         binding.iperfArgs.isEnabled = true
-        binding.startStopButton.text = applicationContext.getString(R.string.startIperf)
     }
 
     private fun runIcmpPingAsCommand() = runBlocking {
