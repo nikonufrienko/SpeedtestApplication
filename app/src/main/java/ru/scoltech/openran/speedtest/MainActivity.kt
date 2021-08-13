@@ -177,13 +177,10 @@ class MainActivity : AppCompatActivity() {
     private fun startIperf() {
         iperfRunner.start(binding.iperfArgs.text.toString())
 
-        binding.iperfArgs.isEnabled = false
     }
 
     private fun stopIperf() {
         iperfRunner.stop()
-
-        binding.iperfArgs.isEnabled = true
     }
 
     private fun runIcmpPingAsCommand() = runBlocking {
