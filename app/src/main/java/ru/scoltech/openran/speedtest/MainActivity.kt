@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private val justICMPPingInChecking = AtomicBoolean(false)
     val pingerByICMP = ICMPPing()
 
-    private val context = this.applicationContext
+    private val context = this
     private lateinit var pingByUDPButtonDispatcher: RunForShortTimeButtonDispatcher
     private lateinit var pingServerButtonDispatcher: ButtonDispatcherOfTwoStates
     private lateinit var justICMPPingDispatcher: ButtonDispatcherOfTwoStates
@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.refreshButton.setOnClickListener {
-
             refreshAddresses()
         }
 
@@ -92,7 +91,8 @@ class MainActivity : AppCompatActivity() {
         startStopButtonDispatcher.secondAction = {
             stopIperf()
             CoroutineScope(Dispatchers.IO).launch {
-                sendGETRequest(binding.serverIpField.toString(), RequestType.STOP, 1000, context)
+                Log.d("stop request", "sent")
+                sendGETRequest(binding.serverIpField.text.toString(), RequestType.STOP, 1000, context)
             }
             binding.thisISserver.isEnabled = true
         }
