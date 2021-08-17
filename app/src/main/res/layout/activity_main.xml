@@ -4,17 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#2C2727"
+    android:background="#f4f4f4"
     tools:context=".MainActivity">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#2C2727">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#f4f4f4"
+            android:focusable="true"
             android:orientation="vertical">
 
             <LinearLayout
@@ -86,8 +88,12 @@
                             android:backgroundTint="#0f62fe"
                             android:text="@string/udpPing" />
 
+                        <Space
+                            android:layout_width="5dp"
+                            android:layout_height="wrap_content" />
+
                         <Button
-                            android:id="@+id/justPingButt"
+                            android:id="@+id/icmp_ping_butt"
                             android:layout_width="132dp"
                             android:layout_height="wrap_content"
                             android:backgroundTint="#0f62fe"
@@ -278,31 +284,39 @@
 
             </LinearLayout>
 
-            <LinearLayout
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#393939"
-                android:orientation="vertical">
+                android:layout_height="400dp"
+                android:background="#2C2727"
+                android:backgroundTint="#2C2727"
+                android:fillViewport="true">
 
-                <TextView
-                    android:id="@+id/iperfOutput"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="233dp"
+                    android:layout_height="wrap_content"
                     android:background="#2C2727"
-                    android:fadeScrollbars="false"
-                    android:foregroundGravity="bottom"
-                    android:gravity="bottom"
-                    android:isScrollContainer="false"
-                    android:maxLines="@android:integer/status_bar_notification_info_maxnum"
-                    android:nestedScrollingEnabled="false"
-                    android:overScrollMode="always"
-                    android:padding="10dp"
-                    android:scrollbarStyle="outsideInset"
-                    android:scrollbars="vertical"
-                    android:textColor="#BFB7B7"
-                    android:verticalScrollbarPosition="right" />
+                    android:orientation="vertical">
 
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/iperfOutput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#2C2727"
+                        android:fadeScrollbars="false"
+                        android:foregroundGravity="bottom"
+                        android:gravity="bottom"
+                        android:isScrollContainer="false"
+                        android:maxLines="@android:integer/status_bar_notification_info_maxnum"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="always"
+                        android:padding="10dp"
+                        android:scrollbarStyle="outsideInset"
+                        android:scrollbars="vertical"
+                        android:textColor="#BFB7B7"
+                        android:verticalScrollbarPosition="right" />
+
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
     </ScrollView>

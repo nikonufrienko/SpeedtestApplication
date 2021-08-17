@@ -6,21 +6,20 @@ import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import androidx.core.view.isVisible
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import ru.scoltech.openran.speedtest.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
-import java.io.IOException
-import java.lang.Exception
-import java.lang.StringBuilder
 import java.net.*
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MainActivity : AppCompatActivity() {
-    private val PING_SERVER_UDP_PORT = 49121
+    companion object {
+        private val PING_SERVER_UDP_PORT = 49121
+
+        enum class RequestType { START, STOP }
+    }
+
     lateinit var binding: ActivityMainBinding
     lateinit var iperfRunner: IperfRunner
 
@@ -62,24 +61,24 @@ class MainActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.IO).launch {
                 if (binding.thisISserver.isChecked) {
                     startIperf()
-                    delay(1000)
                 }
-                
+
                 val value = sendGETRequest(
                     binding.serverIpField.text.toString(),
-                    binding.serverArgs.text.toString(),
-                    1000
+                    RequestType.START,
+                    1000,
+                    binding.serverArgs.text.toString()
                 )
                 Log.d("requestValue", value)
                 runOnUiThread {
                     if (value != "error") {
                         if (!binding.thisISserver.isChecked) {
-                            Thread.sleep(1000)
                             startIperf()
                         }
                         binding.startStopButton.isEnabled = true
                     } else {
                         binding.startStopButton.isEnabled = true
+                        binding.thisISserver.isEnabled = true
                         startStopButtonDispatcher.changeState()
                     }
                     binding.iperfOutput.append(value + "\n")
@@ -89,6 +88,9 @@ class MainActivity : AppCompatActivity() {
 
         startStopButtonDispatcher.secondAction = {
             stopIperf()
+            CoroutineScope(Dispatchers.IO).launch {
+                sendGETRequest(binding.serverIpField.toString(), RequestType.STOP, 1000)
+            }
             binding.thisISserver.isEnabled = true
         }
 
@@ -97,7 +99,11 @@ class MainActivity : AppCompatActivity() {
             this,
             applicationContext.getString(R.string.pingTesting)
         ) { resetAct ->
-            pingUDPButtonAction(resetAct)
+            binding.icmpPingButt.isEnabled = false
+            pingUDPButtonAction {
+                runOnUiThread{binding.icmpPingButt.isEnabled = true}
+                resetAct()
+            }
         }
 
         pingServerButtonDispatcher = ButtonDispatcherOfTwoStates(
@@ -111,14 +117,16 @@ class MainActivity : AppCompatActivity() {
         binding.iperfOutput.movementMethod = ScrollingMovementMethod()
 
         justICMPPingDispatcher = ButtonDispatcherOfTwoStates(
-            binding.justPingButt,
+            binding.icmpPingButt,
             this,
             applicationContext.getString(R.string.bigStop)
         )
         justICMPPingDispatcher.firstAction = {
+            binding.pingUDPButt.isEnabled = false
             justICMPPing()
         }
         justICMPPingDispatcher.secondAction = {
+            binding.pingUDPButt.isEnabled = true
             stopICMPPing()
         }
 
@@ -159,11 +167,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun sendGETRequest(address: String, value: String, timeout: Int): String {
+    private suspend fun sendGETRequest(
+        address: String,
+        requestType: RequestType,
+        timeout: Int,
+        value: String = "",
+    ): String {
         var result = ""
         val isComplete = AtomicBoolean(false)
         val queue = Volley.newRequestQueue(this)
-        val url = "http://$address:5000/start-iperf?args=$value"
+        val url = when (requestType) {
+            RequestType.START -> "http://$address:5000/start-iperf?args=$value"
+            RequestType.STOP -> "http://$address:5000/stop-iperf"
+        }
         val start = System.currentTimeMillis()
         val stringRequest = StringRequest(
             Request.Method.GET, url,
@@ -263,7 +279,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun justICMPPing() = runBlocking {
         justICMPPingInChecking.set(true)
-        binding.justPingButt.text = getString(R.string.bigStop)
+        binding.icmpPingButt.text = getString(R.string.bigStop)
         CoroutineScope(Dispatchers.IO).launch {
             pingerByICMP.justPingByHost(
                 binding.serverIP.text.toString()
