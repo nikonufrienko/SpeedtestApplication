@@ -97,7 +97,12 @@
                             android:layout_width="132dp"
                             android:layout_height="wrap_content"
                             android:backgroundTint="#0f62fe"
-                            android:text="@string/icmpPing" />
+                            android:text="@string/icmpPing"
+                            tools:ignore="TextContrastCheck" />
+
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
                     </LinearLayout>
 
                     <Button
@@ -115,7 +120,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:backgroundTint="#8d8d8d "
-                    app:srcCompat="@android:drawable/arrow_down_float" />
+                    app:srcCompat="@android:drawable/arrow_down_float"
+                    tools:ignore="TouchTargetSizeCheck" />
 
             </LinearLayout>
 
@@ -137,12 +143,18 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/ipInfo"
+                    <androidx.core.widget.NestedScrollView
                         android:layout_width="match_parent"
-                        android:layout_height="91dp"
-                        android:padding="10dp"
-                        android:scrollbars="vertical" />
+                        android:layout_height="102dp"
+                        android:fillViewport="true">
+
+                        <TextView
+                            android:id="@+id/ipInfo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:scrollbars="vertical" />
+                    </androidx.core.widget.NestedScrollView>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -265,18 +277,18 @@
                 android:orientation="horizontal"
                 android:padding="10dp">
 
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.85" />
+
                 <Switch
                     android:id="@+id/thisISserver"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="0.85"
-                    android:text="this is server"
+                    android:text="@string/thisIsServer"
                     android:textAlignment="textEnd" />
-
-                <Space
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.85" />
 
                 <Button
                     android:id="@+id/startStopButton"
