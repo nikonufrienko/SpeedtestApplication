@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private val justICMPPingInChecking = AtomicBoolean(false)
     val pingerByICMP = ICMPPing()
 
-
+    private val context = this.applicationContext
     private lateinit var pingByUDPButtonDispatcher: RunForShortTimeButtonDispatcher
     private lateinit var pingServerButtonDispatcher: ButtonDispatcherOfTwoStates
     private lateinit var justICMPPingDispatcher: ButtonDispatcherOfTwoStates
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                 val value = sendGETRequest(
                     binding.serverIpField.text.toString(),
                     RequestType.START,
-                    1000,
+                    1000, context,
                     binding.serverArgs.text.toString()
                 )
                 Log.d("requestValue", value)
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         startStopButtonDispatcher.secondAction = {
             stopIperf()
             CoroutineScope(Dispatchers.IO).launch {
-                sendGETRequest(binding.serverIpField.toString(), RequestType.STOP, 1000)
+                sendGETRequest(binding.serverIpField.toString(), RequestType.STOP, 1000, context)
             }
             binding.thisISserver.isEnabled = true
         }
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         ) { resetAct ->
             binding.icmpPingButt.isEnabled = false
             pingUDPButtonAction {
-                runOnUiThread{binding.icmpPingButt.isEnabled = true}
+                runOnUiThread { binding.icmpPingButt.isEnabled = true }
                 resetAct()
             }
         }
@@ -168,42 +168,6 @@ class MainActivity : AppCompatActivity() {
             pcs = PingCheckServer(PING_SERVER_UDP_PORT)
             pcs.start()
         }
-    }
-
-    private suspend fun sendGETRequest(
-        address: String,
-        requestType: RequestType,
-        timeout: Int,
-        value: String = "",
-    ): String {
-        var result = ""
-        val isComplete = AtomicBoolean(false)
-        val queue = Volley.newRequestQueue(this)
-        val url = when (requestType) {
-            RequestType.START -> "http://$address:5000/start-iperf?args=$value"
-            RequestType.STOP -> "http://$address:5000/stop-iperf"
-        }
-        val start = System.currentTimeMillis()
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
-            { response ->
-                result = response
-                isComplete.set(true)
-            },
-            {
-                result = "error"
-                isComplete.set(true)
-                Log.d("get:", "Error \n $url \n $it")
-            })
-        queue.add(stringRequest)
-
-        while (System.currentTimeMillis() - start < timeout) {
-            delay(10)
-            if (isComplete.get()) {
-                return result
-            }
-        }
-        return "error"
     }
 
     private fun stopPingServer() {
