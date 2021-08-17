@@ -40,7 +40,10 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.refreshButton.setOnClickListener { refreshAddresses() }
+        binding.refreshButton.setOnClickListener {
+
+            refreshAddresses()
+        }
 
         refreshAddresses()
 
@@ -235,7 +238,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshAddresses() {
         print("checking ip")
-        binding.ipInfo.text = NetworkInterface.getNetworkInterfaces()
+        val info = NetworkInterface.getNetworkInterfaces()
             .toList()
             .filter { it.inetAddresses.hasMoreElements() }
             .joinToString(separator = System.lineSeparator()) { networkInterface ->
@@ -244,6 +247,8 @@ class MainActivity : AppCompatActivity() {
                     .joinToString(separator = ", ")
                 "${networkInterface.displayName}: $addresses"
             }
+        binding.ipInfo.text = info
+        Log.d("interfaces", info)
     }
 
     private fun handleIperfOutput(text: String) {

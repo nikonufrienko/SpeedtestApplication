@@ -162,6 +162,10 @@
                             android:minHeight="48dp"
                             android:text="@string/refreshIp" />
 
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
                     </LinearLayout>
 
                 </LinearLayout>
