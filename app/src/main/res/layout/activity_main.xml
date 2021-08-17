@@ -98,6 +98,8 @@
                             android:layout_height="wrap_content"
                             android:backgroundTint="#0f62fe"
                             android:text="@string/icmpPing" />
+
+                        <Space android:layout_width="10dp" />
                     </LinearLayout>
 
                     <Button
