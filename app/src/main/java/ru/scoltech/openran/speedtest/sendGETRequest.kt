@@ -34,6 +34,7 @@ suspend fun sendGETRequest(
             else -> InetAddress.getByName("localhost")
         }
     } catch (e: UnknownHostException) {
+        Log.e("sendGETRequest", e.message!!)
         return "error"
     }
     val url = when (requestType) {
@@ -52,8 +53,7 @@ suspend fun sendGETRequest(
             channel.trySend(String(connection.inputStream.readBytes(), StandardCharsets.UTF_8))
         } catch (e: IOException) {
             channel.trySend("error")
-        }
-        finally {
+        } finally {
             connection.disconnect()
         }
     }

@@ -151,10 +151,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.deviceInfoLayout.isVisible = false
-        GlobalScope.launch{
-            delay(1000)
-            stopIperf()
-        }
     }
 
     private fun startPingCheckServer() {
