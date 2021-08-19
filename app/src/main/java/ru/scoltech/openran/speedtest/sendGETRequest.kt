@@ -3,7 +3,11 @@ package ru.scoltech.openran.speedtest
 import android.content.Context
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import java.net.URL
+import java.nio.charset.StandardCharsets
 
 enum class RequestType { START, STOP }
 
@@ -20,10 +24,13 @@ suspend fun sendGETRequest(
     }
     val channel = Channel<String>()
     CoroutineScope(Dispatchers.IO).launch{
-        val request = URL(url)
-        val connection = request.openConnection()
-        connection.doOutput = true
-        channel.trySend(connection.getInputStream().bufferedReader().readLine())
+        try {
+            val request = URL(url)
+            val connection = request.openConnection()
+            channel.trySend(String(connection.getInputStream().readBytes(), StandardCharsets.UTF_8))
+        } catch (e: IOException){
+            e.printStackTrace()
+        }
     }
     CoroutineScope(Dispatchers.IO).launch {
         delay(timeout.toLong())
