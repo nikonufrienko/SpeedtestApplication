@@ -38,8 +38,10 @@ suspend fun sendGETRequest(
         return "error"
     }
     val url = when (requestType) {
-        RequestType.START -> "http://${currentAddress.hostAddress}:$currentPort/start-iperf?args=$value"
-        RequestType.STOP -> "http://${currentAddress.hostAddress}:$currentPort/stop-iperf"
+        RequestType.START ->
+            "http://${currentAddress.hostAddress}:$currentPort/start-iperf?args=${URLEncoder.encode(value, "utf-8")}"
+        RequestType.STOP ->
+            "http://${currentAddress.hostAddress}:$currentPort/stop-iperf"
     }
     val channel = Channel<String>()
     val connection = try {
