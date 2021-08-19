@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                         binding.thisISserver.isEnabled = true
                         startStopButtonDispatcher.changeState()
                     }
-                    binding.iperfOutput.append(value + "\n")
+                    binding.iperfOutput.append("Remote server: $value\n")
                 }
             }
         }

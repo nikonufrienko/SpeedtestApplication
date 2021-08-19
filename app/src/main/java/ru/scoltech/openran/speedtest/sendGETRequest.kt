@@ -39,7 +39,7 @@ suspend fun sendGETRequest(
     }
     val url = when (requestType) {
         RequestType.START ->
-            "http://${currentAddress.hostAddress}:$currentPort/start-iperf?args=${URLEncoder.encode(value, "utf-8")}"
+            "http://${currentAddress.hostAddress}:$currentPort/start-iperf?args=${URLEncoder.encode(value, StandardCharsets.UTF_8.toString())}"
         RequestType.STOP ->
             "http://${currentAddress.hostAddress}:$currentPort/stop-iperf"
     }
