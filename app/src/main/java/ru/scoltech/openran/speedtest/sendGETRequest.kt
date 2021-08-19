@@ -1,13 +1,9 @@
 package ru.scoltech.openran.speedtest
 
-import android.content.Context
 import android.util.Log
-import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
 import java.net.*
 import java.nio.charset.StandardCharsets
 
@@ -54,6 +50,7 @@ suspend fun sendGETRequest(
     CoroutineScope(Dispatchers.IO).launch {
         try {
             channel.trySend(String(connection.inputStream.readBytes(), StandardCharsets.UTF_8))
+            try{connection.inputStream.close()}catch (e: IOException){}
         } catch (e: IOException) {
             channel.trySend("error")
         }
