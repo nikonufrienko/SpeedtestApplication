@@ -12,7 +12,7 @@ enum class RequestType { START, STOP }
 suspend fun sendGETRequest(
     address: String,
     requestType: RequestType,
-    timeout: Int,
+    timeout: Long,
     value: String = ""
 ): String {
     var currentPort = ApplicationConstants.HTTP_SERVER_PORT;
@@ -37,12 +37,12 @@ suspend fun sendGETRequest(
         return "error"
     }
     val url = when (requestType) {
-        RequestType.START -> "http://${currentAddress.hostAddress}:${currentPort}/start-iperf?args=$value"
-        RequestType.STOP -> "http://$currentAddress:${currentPort}/stop-iperf"
+        RequestType.START -> "http://${currentAddress.hostAddress}:$currentPort/start-iperf?args=$value"
+        RequestType.STOP -> "http://${currentAddress.hostAddress}:$currentPort/stop-iperf"
     }
     val channel = Channel<String>()
     val connection = try {
-        Log.d("url", url)
+        Log.d("sendGETRequest", url)
         URL(url).openConnection() as HttpURLConnection
     } catch (e: IOException) {
         return "error"
@@ -50,14 +50,15 @@ suspend fun sendGETRequest(
     CoroutineScope(Dispatchers.IO).launch {
         try {
             channel.trySend(String(connection.inputStream.readBytes(), StandardCharsets.UTF_8))
-            try{connection.inputStream.close()}catch (e: IOException){}
         } catch (e: IOException) {
             channel.trySend("error")
         }
-        connection.disconnect()
+        finally {
+            connection.disconnect()
+        }
     }
     CoroutineScope(Dispatchers.IO).launch {
-        delay(timeout.toLong())
+        delay(timeout)
         channel.trySend("error")
         connection.disconnect()
     }

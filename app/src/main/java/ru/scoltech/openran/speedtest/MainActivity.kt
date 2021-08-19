@@ -151,7 +151,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.deviceInfoLayout.isVisible = false
-
+        GlobalScope.launch{
+            delay(1000)
+            stopIperf()
+        }
     }
 
     private fun startPingCheckServer() {
@@ -168,8 +171,6 @@ class MainActivity : AppCompatActivity() {
             if (pcs.isAlive) {
                 pcs.interrupt()
             }
-            //binding.pingServerButt.text = getString(R.string.startUdpPingServer)
-            delay(500)
             Log.d("ping server:", "pcs thread is alive: ${pcs.isAlive}")
         }
     }
