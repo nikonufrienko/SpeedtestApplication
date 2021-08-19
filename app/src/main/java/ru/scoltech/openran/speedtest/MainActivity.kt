@@ -5,20 +5,13 @@ import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import androidx.core.view.isVisible
-import com.android.volley.Request
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import ru.scoltech.openran.speedtest.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
 import java.net.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        private val PING_SERVER_UDP_PORT = 49121
 
-        enum class RequestType { START, STOP }
-    }
 
     lateinit var binding: ActivityMainBinding
     lateinit var iperfRunner: IperfRunner
@@ -29,7 +22,6 @@ class MainActivity : AppCompatActivity() {
     private val justICMPPingInChecking = AtomicBoolean(false)
     val pingerByICMP = ICMPPing()
 
-    private val context = this
     private lateinit var pingByUDPButtonDispatcher: RunForShortTimeButtonDispatcher
     private lateinit var pingServerButtonDispatcher: ButtonDispatcherOfTwoStates
     private lateinit var justICMPPingDispatcher: ButtonDispatcherOfTwoStates
@@ -68,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                 val value = sendGETRequest(
                     binding.serverIpField.text.toString(),
                     RequestType.START,
-                    1000, context,
+                    1000, this@MainActivity,
                     binding.serverArgs.text.toString()
                 )
                 Log.d("requestValue", value)
@@ -92,25 +84,25 @@ class MainActivity : AppCompatActivity() {
             stopIperf()
             CoroutineScope(Dispatchers.IO).launch {
                 Log.d("stop request", "sent")
-                sendGETRequest(binding.serverIpField.text.toString(), RequestType.STOP, 1000, context)
+                sendGETRequest(binding.serverIpField.text.toString(), RequestType.STOP, 1000, this@MainActivity)
             }
             binding.thisISserver.isEnabled = true
         }
 
         pingByUDPButtonDispatcher = RunForShortTimeButtonDispatcher(
-            binding.pingUDPButt,
+            binding.pingUDPButton,
             this,
             applicationContext.getString(R.string.pingTesting)
         ) { resetAct ->
-            binding.icmpPingButt.isEnabled = false
+            binding.icmpPingButton.isEnabled = false
             pingUDPButtonAction {
-                runOnUiThread { binding.icmpPingButt.isEnabled = true }
+                runOnUiThread { binding.icmpPingButton.isEnabled = true }
                 resetAct()
             }
         }
 
         pingServerButtonDispatcher = ButtonDispatcherOfTwoStates(
-            binding.pingServerButt,
+            binding.pingServerButton,
             this,
             applicationContext.getString(R.string.bigStop)
         )
@@ -120,16 +112,16 @@ class MainActivity : AppCompatActivity() {
         binding.iperfOutput.movementMethod = ScrollingMovementMethod()
 
         justICMPPingDispatcher = ButtonDispatcherOfTwoStates(
-            binding.icmpPingButt,
+            binding.icmpPingButton,
             this,
             applicationContext.getString(R.string.bigStop)
         )
         justICMPPingDispatcher.firstAction = {
-            binding.pingUDPButt.isEnabled = false
+            binding.pingUDPButton.isEnabled = false
             justICMPPing()
         }
         justICMPPingDispatcher.secondAction = {
-            binding.pingUDPButt.isEnabled = true
+            binding.pingUDPButton.isEnabled = true
             stopICMPPing()
         }
 
@@ -163,9 +155,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startPingCheckServer() {
-        binding.pingServerButt.text = getString(R.string.bigStop)
+        binding.pingServerButton.text = getString(R.string.bigStop)
         CoroutineScope(Dispatchers.IO).launch {
-            pcs = PingCheckServer(PING_SERVER_UDP_PORT)
+            pcs = PingCheckServer(ApplicationConstants.PING_SERVER_UDP_PORT)
             pcs.start()
         }
     }
@@ -176,7 +168,7 @@ class MainActivity : AppCompatActivity() {
             if (pcs.isAlive) {
                 pcs.interrupt()
             }
-            binding.pingServerButt.text = getString(R.string.startUdpPingServer)
+            //binding.pingServerButt.text = getString(R.string.startUdpPingServer)
             delay(500)
             Log.d("ping server:", "pcs thread is alive: ${pcs.isAlive}")
         }
@@ -201,7 +193,6 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun refreshAddresses() {
-        print("checking ip")
         val info = NetworkInterface.getNetworkInterfaces()
             .toList()
             .filter { it.inetAddresses.hasMoreElements() }
@@ -248,7 +239,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun justICMPPing() = runBlocking {
         justICMPPingInChecking.set(true)
-        binding.icmpPingButt.text = getString(R.string.bigStop)
+        binding.icmpPingButton.text = getString(R.string.bigStop)
         CoroutineScope(Dispatchers.IO).launch {
             pingerByICMP.justPingByHost(
                 binding.serverIP.text.toString()

@@ -82,7 +82,7 @@
                             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                         <Button
-                            android:id="@+id/pingUDPButt"
+                            android:id="@+id/pingUDPButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:backgroundTint="#0f62fe"
@@ -93,7 +93,7 @@
                             android:layout_height="wrap_content" />
 
                         <Button
-                            android:id="@+id/icmp_ping_butt"
+                            android:id="@+id/icmpPingButton"
                             android:layout_width="132dp"
                             android:layout_height="wrap_content"
                             android:backgroundTint="#0f62fe"
@@ -106,7 +106,7 @@
                     </LinearLayout>
 
                     <Button
-                        android:id="@+id/pingServerButt"
+                        android:id="@+id/pingServerButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.85"
