@@ -1,6 +1,7 @@
 package ru.scoltech.openran.speedtest
 
 import android.util.Log
+import androidx.core.text.isDigitsOnly
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import java.io.IOException
@@ -9,6 +10,7 @@ import java.nio.charset.StandardCharsets
 
 enum class RequestType { START, STOP }
 
+@Suppress("BlockingMethodInNonBlockingContext") //all right
 suspend fun sendGETRequest(
     address: String,
     requestType: RequestType,
@@ -21,17 +23,18 @@ suspend fun sendGETRequest(
         when {
             !address.contains(':') || (address.first() == '[' && address.last() == ']') ->
                 InetAddress.getByName(address) //IPv4 or IPv6
-            address.split(":").size == 2 -> {
+            address.split(":").size == 2 && address.split(":")[1].isDigitsOnly() -> {
                 val addressAndPort = address.split(":")
                 currentPort = addressAndPort[1].toInt()
                 InetAddress.getByName(addressAndPort[0])
             }//IPv4 with port
-            address.contains("]:") && address.first() == '[' -> {
+            address.contains("]:") && address.first() == '[' && address.split("]:").size == 2
+                    && address.split("]:")[1].isDigitsOnly() -> {
                 val addressAndPort = address.split("]:")
                 currentPort = addressAndPort[1].toInt()
                 InetAddress.getByName(addressAndPort[0] + ']')
             }//IPv6 with port
-            else -> InetAddress.getByName("localhost")
+            else -> return "error"
         }
     } catch (e: UnknownHostException) {
         Log.e("sendGETRequest", e.message!!)
@@ -39,7 +42,12 @@ suspend fun sendGETRequest(
     }
     val url = when (requestType) {
         RequestType.START ->
-            "http://${currentAddress.hostAddress}:$currentPort/start-iperf?args=${URLEncoder.encode(value, StandardCharsets.UTF_8.toString())}"
+            "http://${currentAddress.hostAddress}:$currentPort/start-iperf?args=${
+                URLEncoder.encode(
+                    value,
+                    StandardCharsets.UTF_8.toString()
+                )
+            }"
         RequestType.STOP ->
             "http://${currentAddress.hostAddress}:$currentPort/stop-iperf"
     }
