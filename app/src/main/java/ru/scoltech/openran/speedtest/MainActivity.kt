@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                 val value = sendGETRequest(
                     binding.serverIpField.text.toString(),
                     RequestType.START,
-                    1000, this@MainActivity,
+                    1000,
                     binding.serverArgs.text.toString()
                 )
                 Log.d("requestValue", value)
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             stopIperf()
             CoroutineScope(Dispatchers.IO).launch {
                 Log.d("stop request", "sent")
-                sendGETRequest(binding.serverIpField.text.toString(), RequestType.STOP, 1000, this@MainActivity)
+                sendGETRequest(binding.serverIpField.text.toString(), RequestType.STOP, 1000)
             }
             binding.thisISserver.isEnabled = true
         }
