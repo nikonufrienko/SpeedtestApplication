@@ -10,13 +10,13 @@ import java.nio.charset.StandardCharsets
 
 enum class RequestType { START, STOP }
 
-@Suppress("BlockingMethodInNonBlockingContext") //all right
+@Suppress("BlockingMethodInNonBlockingContext") //all right, because Dispatcher.IO is used
 suspend fun sendGETRequest(
     address: String,
     requestType: RequestType,
     timeout: Long,
     value: String = ""
-): String {
+): Pair<String,String> {
     var currentPort = ApplicationConstants.HTTP_SERVER_PORT;
 
     var currentAddress: InetAddress = try {
@@ -34,11 +34,11 @@ suspend fun sendGETRequest(
                 currentPort = addressAndPort[1].toInt()
                 InetAddress.getByName(addressAndPort[0] + ']')
             }//IPv6 with port
-            else -> return "error"
+            else -> return Pair("error", "wrong address")
         }
     } catch (e: UnknownHostException) {
         Log.e("sendGETRequest", e.message!!)
-        return "error"
+        return Pair("error", e.message!!)
     }
     val url = when (requestType) {
         RequestType.START ->
@@ -56,7 +56,7 @@ suspend fun sendGETRequest(
         Log.d("sendGETRequest", url)
         URL(url).openConnection() as HttpURLConnection
     } catch (e: IOException) {
-        return "error"
+        return Pair("error", e.message!!)
     }
     CoroutineScope(Dispatchers.IO).launch {
         try {
@@ -72,5 +72,6 @@ suspend fun sendGETRequest(
         channel.trySend("error")
         connection.disconnect()
     }
-    return channel.receive()
+    val result = channel.receive()
+    return if(result != "error") Pair(result, "") else Pair(result, "Timeout expired")
 }

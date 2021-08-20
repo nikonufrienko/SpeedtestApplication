@@ -51,18 +51,18 @@ class MainActivity : AppCompatActivity() {
         startStopButtonDispatcher.firstAction = {
             binding.thisISserver.isEnabled = false
             binding.startStopButton.isEnabled = false
-            Log.d("getReq", "preparing")
             CoroutineScope(Dispatchers.IO).launch {
                 if (binding.thisISserver.isChecked) {
                     startIperf()
                 }
-
-                val value = sendGETRequest(
+                val result = sendGETRequest(
                     binding.serverIpField.text.toString(),
                     RequestType.START,
                     1000,
                     binding.serverArgs.text.toString()
                 )
+                val value = result.first
+                val errorMsg = result.second
                 Log.d("requestValue", value)
                 runOnUiThread {
                     if (value != "error") {
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                         binding.thisISserver.isEnabled = true
                         startStopButtonDispatcher.changeState()
                     }
-                    binding.iperfOutput.append("Remote server: $value\n")
+                    binding.iperfOutput.append("Remote server: $value ${if(value == "error") ": $errorMsg" else ""}\n")
                 }
             }
         }
